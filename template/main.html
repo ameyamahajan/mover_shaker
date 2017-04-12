@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="/static/css/style.css" rel="stylesheet">
+      {% block script %}
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript">
+
+      $(document).ready(function(){
+          $("#upload-file").click(function(e){
+            var fileSelect = document.getElementById("input-file");
+            var formData = new FormData();
+            var file = fileSelect.files[0];
+            formData.append('contents', file);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/upload', true);
+            xhr.send(formData);
+            e.preventDefault();
+        })
+      })
+    </script>
+      {% endblock %}
+      <title>  Data Upload </title>
+  </head>
+  <body>
+    Welcome to
+    {% block upload_button %}
+    <input type="file" id="input-file" name='input-file'/>
+    <button id="upload-file">Upload File</button>
+    {% endblock %}
+  </body>
+</html>
