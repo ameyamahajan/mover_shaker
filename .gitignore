@@ -3,3 +3,4 @@ data/*
 test_server.py
 */*.pyc
 public/css/*
+config/*
