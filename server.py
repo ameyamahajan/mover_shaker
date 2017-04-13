@@ -1,4 +1,4 @@
-import cherrypy 
+import cherrypy
 import os
 from helper import file_handler, status_check, config
 from jinja2 import Environment, FileSystemLoader
@@ -37,6 +37,7 @@ class FileHandler(object):
             print("File Uploaded"+str(cherrypy.session.get('file_name')))
         if fh.save(contents.file, contents.filename):
             result = status_check.StatusCheck(conf).check_upload_status(cherrypy.session.get('file_name'))
+            cherrypy.HTTPRedirect('/upload')
             return template.render(rows=result)
         else:
             error_handler('Upload error')
@@ -54,8 +55,7 @@ class FileHandler(object):
             results = sc.check_upload_status(cherrypy.session.get('file_name'))
         else:
             results = sc.check_status()
-        return template.render(rows=results)
-
+        template.render(rows=results)
 
 @cherrypy.expose
 class Status(object):
@@ -92,9 +92,14 @@ if __name__ == '__main__':
         '/static': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': './public'
+        },
+        'global': {
+            'server.max_request_body_size': 0
         }
     }
     webapp = Server()
     webapp.upload = FileHandler()
     webapp.status = Status()
+    #cherrypy.tree.mount(FileHandler(), '/upload', conf)
+    #cherrypy.tree.mount(Status(), '/status', conf)
     cherrypy.quickstart(webapp, '/', conf)

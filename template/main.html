@@ -13,10 +13,23 @@
             var file = fileSelect.files[0];
             formData.append('contents', file);
             var xhr = new XMLHttpRequest();
+            xhr.addEventListener("progress", updateProgress);
+            xhr.addEventListener("load", transferComplete);
             xhr.open('POST', '/upload', true);
             xhr.send(formData);
             e.preventDefault();
         })
+
+
+        function transferComplete(evt) {
+            console.log("The transfer is complete.");
+            alert("Upload Completed");
+            document.getElementById("rest").innerHTML = "Uploaded the file success";
+
+          };
+        function updateProgress(evt) {
+              console.log("In progress");
+          }
       })
     </script>
       {% endblock %}
@@ -27,6 +40,9 @@
     {% block upload_button %}
     <input type="file" id="input-file" name='input-file'/>
     <button id="upload-file">Upload File</button>
+    <div id="rest"></div>
+    <div id="test"></div>
     {% endblock %}
   </body>
 </html>
+
