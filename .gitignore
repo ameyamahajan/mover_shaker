@@ -4,3 +4,5 @@ test_server.py
 */*.pyc
 public/css/*
 config/*
+.DS_Store
+test.py
