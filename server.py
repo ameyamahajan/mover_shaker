@@ -37,8 +37,8 @@ class FileHandler(object):
             print("File Uploaded"+str(cherrypy.session.get('file_name')))
         if fh.save(contents.file, contents.filename):
             result = status_check.StatusCheck(conf).check_upload_status(cherrypy.session.get('file_name'))
-            cherrypy.HTTPRedirect('/upload')
-            return template.render(rows=result)
+            raise cherrypy.HTTPRedirect('/upload')
+            #return template.render(rows=result)
         else:
             error_handler('Upload error')
 
@@ -94,7 +94,8 @@ if __name__ == '__main__':
             'tools.staticdir.dir': './public'
         },
         'global': {
-            'server.max_request_body_size': 0
+            'server.max_request_body_size': 0,
+            'server.socket_port': 5000
         }
     }
     webapp = Server()
