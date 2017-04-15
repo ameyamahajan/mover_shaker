@@ -76,8 +76,8 @@ class TrackingFileDB():
 
 
 if __name__=="__main__":
-    con = ConfigApp('cloudharmonics')
-    sc = TrackingFileDB(con)
+    conf = ConfigApp('cloudharmonics')
+    sc = TrackingFileDB(conf)
     sc.add_file('test4.pos')
     sc.get_recent()
     sc.get_status('test.pos')

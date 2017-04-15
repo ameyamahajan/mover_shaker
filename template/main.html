@@ -13,22 +13,27 @@
             var file = fileSelect.files[0];
             formData.append('contents', file);
             var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/upload', true);
             xhr.addEventListener("progress", updateProgress);
             xhr.addEventListener("load", transferComplete);
-            xhr.open('POST', '/upload', true);
+            xhr.onreadystatechange = function(){
+              if (xhr.readyState == 4 && xhr.status == 200){
+                  document.getElementById("test").innerHTML = xhr.responseText;
+              }
+            }
             xhr.send(formData);
             e.preventDefault();
         })
 
 
-        function transferComplete(evt) {
+        function transferComplete(e) {
             console.log("The transfer is complete.");
             alert("Upload Completed");
-            document.getElementById("rest").innerHTML = "Uploaded the file success";
-
+            document.getElementById("rest").innerHTML =  'Uploaded successfully!'
           };
         function updateProgress(evt) {
               console.log("In progress");
+              document.getElementById("rest").innerHTML =  'Uploading in progress . . .'
           }
       })
     </script>

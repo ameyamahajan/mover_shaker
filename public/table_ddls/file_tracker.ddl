@@ -1,3 +1,5 @@
+--
+
 CREATE TABLE file_tracker(
 process_date datetime,
 update_date datetime,

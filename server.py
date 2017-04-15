@@ -6,6 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 
 env = Environment(loader=FileSystemLoader('./template/'))
 conf = None
+
 @cherrypy.expose
 class Server(object):
     @cherrypy.expose
@@ -21,6 +22,17 @@ class Server(object):
 
 @cherrypy.expose
 class FileHandler(object):
+    conf = {
+        '/': {
+            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+            'tools.sessions.on': True,
+            'tools.response_headers.on': True,
+            'tools.response_headers.headers': [('Content-Type', 'text/html')],
+        },
+        'global': {
+            'server.max_request_body_size': 0
+        }
+    }
     @cherrypy.tools.accept(media='text/plain')
     @cherrypy.expose
     def POST(self, contents):
@@ -37,10 +49,9 @@ class FileHandler(object):
             print("File Uploaded"+str(cherrypy.session.get('file_name')))
         if fh.save(contents.file, contents.filename):
             result = status_check.StatusCheck(conf).check_upload_status(cherrypy.session.get('file_name'))
-            cherrypy.HTTPRedirect('/upload')
             return template.render(rows=result)
         else:
-            error_handler('Upload error')
+            return error_handler('Upload error')
 
 
     @cherrypy.expose
@@ -55,12 +66,22 @@ class FileHandler(object):
             results = sc.check_upload_status(cherrypy.session.get('file_name'))
         else:
             results = sc.check_status()
-        template.render(rows=results)
+        #return template.render(rows=results)
+        raise cherrypy.HTTPRedirect('/upload')
 
 @cherrypy.expose
 class Status(object):
+
+    conf = {
+        '/': {
+            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+            'tools.response_headers.on': True,
+            'tools.response_headers.headers': [('Content-Type', 'text/html')]
+        }
+    }
+
     @cherrypy.tools.accept(media='text/plain')
-    @cherrypy.expose
+    @cherrypy.expose()
     def GET(self):
         sc = status_check.StatusCheck(conf)
         template = env.get_template('status.html')
@@ -82,24 +103,28 @@ if __name__ == '__main__':
         '/upload': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             'tools.response_headers.on': True,
-            'tools.response_headers.headers': [('Content-Type', 'text/html')],
+            'tools.response_headers.headers': [('Content-Type', 'text/html')]
         },
         '/status': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             'tools.response_headers.on': True,
-            'tools.response_headers.headers': [('Content-Type', 'text/html')],
+            'tools.response_headers.headers': [('Content-Type', 'text/html')]
         },
         '/static': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': './public'
         },
         'global': {
-            'server.max_request_body_size': 0
+            'server.max_request_body_size': 0,
+            'error_page.404': error_handler,
         }
     }
     webapp = Server()
     webapp.upload = FileHandler()
     webapp.status = Status()
-    #cherrypy.tree.mount(FileHandler(), '/upload', conf)
-    #cherrypy.tree.mount(Status(), '/status', conf)
-    cherrypy.quickstart(webapp, '/', conf)
+    cherrypy.tree.mount(FileHandler(), '/upload', FileHandler.conf)
+    cherrypy.tree.mount(Status(), '/status', Status.conf)
+    cherrypy.tree.mount(Server(), '/', Status.conf)
+    #cherrypy.quickstart(webapp, '/', conf)
+    cherrypy.engine.start()
+    cherrypy.engine.block()
